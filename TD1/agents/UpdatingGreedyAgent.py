@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class GreedyAgent:
+class UpdatingGreedyAgent:
     def __init__(self):
         """Init a new agent.
         """
@@ -36,7 +36,7 @@ class GreedyAgent:
         This is where your agent can learn.
         """
         exploratory_length = self.expl_length_per_agent * self.num_arms
-        if sum(self.arms_pulled) <= exploratory_length:
+        if sum(self.arms_pulled) >= exploratory_length:
             self.best_arm = np.argmax(self.avg_perf)
 
         self.avg_perf[action] = (self.arms_pulled[action]*self.avg_perf[action] + reward) / (self.arms_pulled[action] + 1)
