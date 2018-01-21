@@ -17,6 +17,10 @@ class UCBAgent:
         Takes as argument an observation of the current state, and
         returns the chosen action.
         """
+        total_arms_pulled = sum(self.arms_pulled)
+        # if total_arms_pulled < 10:
+        #     return int(total_arms_pulled)
+        # else:
         return np.argmax(self.B)
 
     def reward(self, observation, action, reward):
@@ -29,7 +33,7 @@ class UCBAgent:
 
         ones = np.ones((self.num_arms,))
 
-        self.B = self.avg_perf + np.sqrt(2*np.log(np.maximum(total_arms_pulled, ones)) / np.maximum(self.arms_pulled, ones))
+        self.B = self.avg_perf + np.sqrt(2*np.log(np.maximum(total_arms_pulled, ones)) / np.maximum(self.arms_pulled, 0.2*ones))
 
         # recalculate avg perf for the arm pulled
         self.avg_perf[action] = (self.arms_pulled[action]*self.avg_perf[action] + reward) / (self.arms_pulled[action] + 1)

@@ -11,6 +11,6 @@ environment.
 
 # Choose which Agent is run for scoring
 # Agent = GreedyAgent
-Agent = UpdatingGreedyAgent
+# Agent = UpdatingGreedyAgent
 # Agent = SoftMaxAgent
-# Agent = UCBAgent
+Agent = UCBAgent
