@@ -15,7 +15,6 @@ ACT_TORCH_DOWN  = 6
 ACT_TORCH_LEFT  = 7
 ACT_TORCH_RIGHT = 8
 
-np.random.seed(42)
 
 class QAgent:
     def __init__(self):
