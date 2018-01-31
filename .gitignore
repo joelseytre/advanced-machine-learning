@@ -82,7 +82,8 @@ celerybeat-schedule
 .env
 .venv
 env/
-venv/
+aml-venv/*
+aml-venv/
 ENV/
 
 # Spyder project settings
@@ -100,3 +101,4 @@ ENV/
 *.xml
 *.iml
 *.zip
+*.h
