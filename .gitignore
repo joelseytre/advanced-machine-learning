@@ -84,6 +84,7 @@ celerybeat-schedule
 env/
 aml-venv/*
 aml-venv/
+aml-venv\*
 ENV/
 
 # Spyder project settings
