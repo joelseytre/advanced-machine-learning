@@ -12,10 +12,10 @@ ACT_NONE = 0
 ACT_BACKWARD = -1
 
 class Environment:
-    def __init__(self, g=10.0, d=100.0, H=10., m=10.0, F=3.0):
+    def __init__(self, g=10.0, d=100.0, H=10., m=10.0, F=6.0):
         """Instanciate a new environement in its initial state.
         """
-        self.mc = MountainCar(g=g, d=d, H=H, m=m, F=F, R=1.0, T=0.0)
+        self.mc = MountainCar(g=g, d=d, H=H, m=m, F=F, R=50.0, T=0.0)
 
     def reset(self):
         self.mc.reset()
