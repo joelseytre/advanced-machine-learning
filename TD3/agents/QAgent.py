@@ -7,7 +7,6 @@ class QAgent:
         """Init a new agent.
         """
         self.epsilon = 0.1
-        self.prob_learning_perfect = 0.5
         self.lr = 0.5
         self.discount = 0.8
 
@@ -70,17 +69,9 @@ class QAgent:
             rand = np.random.rand()
             if rand < self.epsilon:
                 return np.random.randint(0, 3)-1
-            elif rand < self.epsilon + self.prob_learning_perfect:
-                if observation[1] > 0:
-                    return 1
-                else:
-                    return -1
         phi = self.phi(observation)
         Q = [np.sum(self.W[:, :, a] * phi) for a in range(0, 3)]
-        # print("\nlocation: %.1f and speed %.1f" % (observation[0], observation[1]))
-        # print("choice made because of Q")
         choice = np.argmax(Q) - 1
-        # choice = np.argmax(Q[:1]+Q[-1:]) - 1
         return choice
 
     def reward(self, observation, action, reward):
