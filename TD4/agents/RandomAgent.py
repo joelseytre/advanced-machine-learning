@@ -8,8 +8,8 @@ class RandomAgent:
     def reset(self, x_range):
         """Reset the state of the agent for the start of new game.
 
-        Parameters of the environment do not change when starting a new
-        episode of the same game, but your initial location is randomized.
+        Parameters of the environment do not change, but your initial
+        location is randomized.
 
         x_range = [xmin, xmax] contains the range of possible values for x
 
@@ -25,7 +25,7 @@ class RandomAgent:
 
         observation = (x, vx)
         """
-        return np.random.choice([-1, 0, 1])
+        return np.random.normal(0, 10)
 
     def reward(self, observation, action, reward):
         """Receive a reward for performing given action on
