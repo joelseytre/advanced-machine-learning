@@ -1,28 +1,20 @@
 import numpy as np
 
-np.random.seed(42)
-
-class QAgent:
+class DiscreteAgent:
     def __init__(self):
         """Init a new agent.
         """
         self.epsilon = 0.1
         self.lr = 0.5
-        self.lr_psi = 0.5
         self.discount = 0.8
 
         # p <=> x and k <=> vx
         self.p = 10
         self.k = 10
 
-        self.sigma = 1
+        self.W_init = 5
 
-        self.T_init = 0.5
-        self.psi_init = 5
-
-        self.T = self.T_init * np.ones((self.p+1, self.k+1))
-        # self.T = self.T_init*(2*np.random.rand(self.p+1,self.k+1)-1)
-        self.psi = self.psi_init * np.ones((self.p+1, self.k+1))
+        self.W = self.W_init * np.ones((self.p+1, self.k+1, 2))
 
         self.S = np.zeros((self.p+1, self.k+1, 2))
 
@@ -34,6 +26,11 @@ class QAgent:
         self.avg_steps = 0
         self.count_victories = 0
         self.learning_period = 180
+
+        self.action_coeff = 0.1
+        self.action_multiplier = 1.6
+        self.time_since_last_victory = -1
+        self.action_multiplier_limit = 4
 
         np.set_printoptions(suppress=True, precision=1)
 
@@ -62,6 +59,11 @@ class QAgent:
                                        -20 + (float(j*40)/float(self.k))]
         self.count_episodes += 1
         self.count_steps = 0
+        self.time_since_last_victory += 1
+
+        if self.time_since_last_victory >= self.action_multiplier_limit:
+            self.action_coeff *= self.action_multiplier
+            self.time_since_last_victory = 0
 
     def act(self, observation):
         """Acts given an observation of the environment.
@@ -71,10 +73,14 @@ class QAgent:
 
         observation = (x, vx)
         """
-
+        if self.count_episodes <= self.learning_period:
+            rand = np.random.rand()
+            if rand < self.epsilon:
+                return (2*np.random.randint(0, 2)-1) * self.action_coeff
         phi = self.phi(observation)
-        mu = np.sum(self.T * phi)
-        choice = np.random.normal(mu, self.sigma)
+        Q = [np.sum(self.W[:, :, a] * phi) for a in range(0, 2)]
+        choice = 2*np.argmax(Q) - 1
+        choice = self.action_coeff * choice
         return choice
 
     def reward(self, observation, action, reward):
@@ -84,33 +90,31 @@ class QAgent:
         This is where your agent can learn.
         """
 
+        action = action / self.action_coeff
+
         # skip 1st step
         if self.previous_observation is not None:
             previous_phi = self.phi(self.previous_observation)
-            current_phi = self.phi(observation)
+            learning = self.lr * previous_phi / np.max(previous_phi)
 
-            # in any case, we update Q for the previous state / action
-            diff2 = self.lr_psi * (
-                self.previous_reward
-                + self.discount * np.sum(self.psi * current_phi)
-                - np.sum(self.psi * previous_phi)) * previous_phi
-            self.psi -= diff2
-            self.T -= self.lr * (
-                self.previous_reward
-                + self.discount * np.sum(self.psi * current_phi)
-                - np.sum(self.psi * previous_phi)) * (self.previous_action - self.T)/self.sigma
+            current_phi = self.phi(observation)
+            current_W = [np.sum(((self.W[:, :, a] * current_phi) / np.sum(current_phi))) for a in range(0, 2)]
+
             # if the game finishes => update Q for current state / action
             if reward > 0:
-                diff1 = self.lr_psi * (reward - np.sum(self.psi * current_phi)) * current_phi
-                self.psi -= diff1
-
-                self.T -= self.lr * (reward - np.sum(self.psi * current_phi)) * (action - self.T)/self.sigma
+                current_learning = self.lr * current_phi / np.max(current_phi)
+                self.W[:, :, int(0.5*(action + 1))] = (1 - current_learning) * self.W[:, :, int(0.5*(action + 1))] + current_learning * reward
+            # in any case, we update Q for the previous state / action
+            self.W[:, :, int(0.5*(self.previous_action+1))] \
+                = (1-learning) * self.W[:, :, int(0.5*(self.previous_action+1))] \
+                + learning * (self.previous_reward + self.discount * np.max(current_W))
         self.previous_action = action
         self.previous_reward = reward
         self.previous_observation = observation
         self.count_steps += 1
-        print(self.T)
+        # print(reward)
         if reward > 0:
+            self.time_since_last_victory = -1
             if self.count_episodes > self.learning_period:
                 self.count_victories += 1
                 self.avg_steps += self.count_steps
